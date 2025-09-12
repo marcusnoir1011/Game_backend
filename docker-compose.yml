@@ -6,10 +6,10 @@ services:
             - "3030:3030"
         environment:
             DB_HOST: db
-            DB_USER: postgres
-            DB_PASSWORD: postgres
+            DB_USER: mark
+            DB_PASSWORD: mark
             DB_NAME: game_backend
-            JWT_SECRET: "supersecret"
+            JWT_SECRET: "my_super_secret_123!@#"
         depends_on:
             - db
 
@@ -18,8 +18,8 @@ services:
         container_name: game-db
         restart: always
         environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
+            POSTGRES_USER: mark
+            POSTGRES_PASSWORD: mark
             POSTGRES_DB: game_backend
         ports:
             - "5433:5432"

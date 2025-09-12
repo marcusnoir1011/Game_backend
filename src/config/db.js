@@ -34,7 +34,7 @@ const connectToDatabase = async () => {
                 attempts,
                 "attempts left"
             );
-            await new Promise((r) => setTimeout(r, 3000));
+            await new Promise((r) => setTimeout(r, 5000));
         }
     }
     throw errorResponse(
