@@ -4,3 +4,4 @@ export const successResponse = (message = "Success", data) => ({
     data,
     timestamp: new Date().toISOString(),
 });
+//# sourceMappingURL=successResponse.js.map

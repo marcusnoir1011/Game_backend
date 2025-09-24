@@ -1,0 +1,124 @@
+// Core
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import jwt, { type JwtPayload } from "jsonwebtoken";
+import dotenv from "dotenv";
+import { type ZodType } from "zod";
+
+// Custom
+import { errorResponse } from "../utils/errorResponse.js";
+import { type ValidatedRequest } from "../types/validatedRequest.js";
+import { type AuthenticatedRequest } from "../types/authenticatedRequest.js";
+
+dotenv.config();
+
+export interface CustomRequest extends Request {
+    user?: {
+        id: number;
+    };
+}
+
+// Authentication
+export const authenticate = (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader?.startsWith("Bearer ")) {
+        return res
+            .status(401)
+            .json(
+                errorResponse(
+                    401,
+                    "NO_TOKEN",
+                    "Authorization token missing.",
+                    req.path
+                )
+            );
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+        return res
+            .status(401)
+            .json(
+                errorResponse(
+                    401,
+                    "INVALID_TOKEN",
+                    "Invalid authorization header format",
+                    req.path
+                )
+            );
+    }
+
+    try {
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET as string
+        ) as JwtPayload;
+        if (!decoded.id) {
+            throw new Error("Invalid token payload");
+        }
+        req.user = { id: decoded.id };
+        next();
+    } catch (err) {
+        return res
+            .status(403)
+            .json(
+                errorResponse(
+                    403,
+                    "TOKEN_INVALID_OR_EXPIRED_TOKEN",
+                    "Token is invalid or expired",
+                    req.path
+                )
+            );
+    }
+};
+
+// Validation
+export const validate =
+    <T>(authSchema: ZodType<T>) =>
+    (req: Request, res: Response, next: NextFunction) => {
+        const result = authSchema.safeParse(req.body);
+        if (!result.success) {
+            const validationErrors = result.error.issues.map((err) => {
+                return `${err.path.join(".")}: ${err.message}`;
+            });
+
+            return res
+                .status(400)
+                .json(
+                    errorResponse(
+                        400,
+                        "VALIDATION_ERROR",
+                        validationErrors.join(", "),
+                        req.path
+                    )
+                );
+        }
+        (req as ValidatedRequest<T>).validated = result.data;
+        next();
+    };
+
+// Error Handler
+export const errorHandler = (
+    err: any,
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    console.error(err);
+    if (err.errorCode) {
+        return res.status(err.status || 400).json(err);
+    }
+    return res
+        .status(500)
+        .json(
+            errorResponse(
+                500,
+                "INTERNAL_SERVER_ERROR",
+                "Something went wrong",
+                req.path
+            )
+        );
+};

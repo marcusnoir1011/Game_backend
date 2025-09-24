@@ -8,6 +8,11 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+ALTER TABLE users
+ADD COLUMN is_verified BOOLEAN DEFAULT FALSE,
+ADD COLUMN verification_token TEXT,
+ADD COLUMN verification_token_expires TIMESTAMP
+
 -- 2. Refresh Tokens
 CREATE TABLE refresh_tokens (
     id SERIAL PRIMARY KEY,

@@ -1,0 +1,34 @@
+{
+    // Visit https://aka.ms/tsconfig to read more about this file
+    "compilerOptions": {
+        // Core settings
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "target": "es2022",
+        "lib": ["ES2022"],
+        "strict": true,
+
+        // Moodule and file resolution
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmitOnError": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+
+        // Output directories and source map
+        "outDir": "./dist",
+        "rootDir": "./",
+        "sourceMap": true,
+        "declaration": true,
+
+        // Stricter type-checking rules
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
+        "noUncheckedSideEffectImports": true,
+        "noImplicitAny": true
+    },
+    "include": ["**/**/*.ts"],
+    "exclude": ["node_modules", "dist"]
+}

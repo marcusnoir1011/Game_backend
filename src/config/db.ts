@@ -1,23 +1,23 @@
 // Core
-import pkg from "pg";
-import dotenv from "dotenv";
+import { Pool } from "pg";
 
 // Custom
 import { errorResponse } from "../utils/errorResponse.js";
+import "./env.js";
 
-dotenv.config();
-
-const { Pool } = pkg;
+if (!process.env.DB_HOST || !process.env.DB_PORT) {
+    throw new Error("Database environment vairables are not set");
+}
 
 const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT, 10),
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    user: process.env.DB_USER,
+    host: process.env.DB_HOST as string,
+    port: parseInt(process.env.DB_PORT as string, 10),
+    database: process.env.DB_NAME as string,
+    password: process.env.DB_PASSWORD as string,
+    user: process.env.DB_USER as string,
 });
 
-const connectToDatabase = async () => {
+const connectToDatabase = async (): Promise<void> => {
     let attempts = 5;
     while (attempts > 0) {
         try {
