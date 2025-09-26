@@ -3,4 +3,4 @@ export interface GenerateRefreshToken {
     token: string;
 }
 export declare const generateRefreshToken: (userId: number) => Promise<GenerateRefreshToken>;
-export declare const verifyAndRevokeRefreshToken: (tokenId: string, refreshToken: string) => Promise<boolean>;
+export declare const verifyAndRevokeRefreshToken: (tokenId: string, refreshToken: string) => Promise<number | null>;

@@ -2,12 +2,7 @@
 import express, { type Router, type RequestHandler } from "express";
 
 // Custom
-import {
-    signUp,
-    login,
-    logout,
-    verifyEmail,
-} from "../controllers/authController.js";
+import { signUp, login, logout } from "../controllers/authController.js";
 import { validate } from "../middleware/middleware.js";
 import {
     signupSchema,
@@ -30,6 +25,5 @@ authRouter.post(
     validate<LoginInput>(loginSchema) as RequestHandler,
     login
 );
-authRouter.get("/auth/verify-email", verifyEmail);
 
 export default authRouter;

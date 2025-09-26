@@ -1,3 +1,3 @@
 import { type Router } from "express";
-declare const router: Router;
-export default router;
+declare const authRouter: Router;
+export default authRouter;

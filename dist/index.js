@@ -5,7 +5,8 @@ import cors from "cors";
 import helmet, { contentSecurityPolicy } from "helmet";
 import rateLimit from "express-rate-limit";
 // Custom
-import router from "./src/routes/authRoute.js";
+import authRouter from "./src/routes/authRoute.js";
+import tokenRouter from "./src/routes/tokenRoute.js";
 import { errorHandler } from "./src/middleware/middleware.js";
 import { connectToDatabase } from "./src/config/db.js";
 import "./src/config/env.js";
@@ -24,7 +25,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/", apiLimiter);
 // Routes
-app.use("/api", router);
+app.use("/api", authRouter);
+app.use("/api", tokenRouter);
 // Error Handler
 app.use(errorHandler);
 // Connecting to database and Start the server

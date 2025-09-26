@@ -13,6 +13,14 @@ ADD COLUMN is_verified BOOLEAN DEFAULT FALSE,
 ADD COLUMN verification_token TEXT,
 ADD COLUMN verification_token_expires TIMESTAMP
 
+ALTER TABLE users
+    DROP COLUMN is_verified,
+    DROP COLUMN verification_token,
+    DROP COLUMN verification_token_expires
+
+ALTER TABLE users
+ADD COLUMN country VARCHAR(100) NOT NULL DEFAULT 'Unknown';
+
 -- 2. Refresh Tokens
 CREATE TABLE refresh_tokens (
     id SERIAL PRIMARY KEY,

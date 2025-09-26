@@ -8,8 +8,6 @@ import { verifyAndRevokeRefreshToken } from "../services/tokenService.js";
 import { errorResponse } from "../utils/errorResponse.js";
 import type { ValidatedRequest } from "../types/validatedRequest.js";
 import type { LoginInput, SignupInput } from "../schema/authSchema.js";
-import { sendVerificationEmail } from "../services/emailService.js";
-import { verifyAndClearVerificationToken } from "../models/user.js";
 
 export const signUp = async (
     req: Request,
@@ -21,6 +19,7 @@ export const signUp = async (
         const { accessToken, refreshToken, user } = await signUpUser(
             validatedReq.validated.username,
             validatedReq.validated.email,
+            validatedReq.validated.country,
             validatedReq.validated.password
         );
 
@@ -38,7 +37,6 @@ export const signUp = async (
             sameSite: "strict",
         });
 
-        await sendVerificationEmail(user.id, user.email);
         res.status(201).json(
             successResponse(
                 "User signed up successful. Please verify your email.",
@@ -60,7 +58,7 @@ export const login = async (
     try {
         const validatedReq = req as ValidatedRequest<LoginInput>;
         const { user, accessToken, refreshToken } = await loginUser(
-            validatedReq.validated.email,
+            validatedReq.validated.usernameOrEmail,
             validatedReq.validated.password
         );
 
@@ -132,56 +130,6 @@ export const logout = async (
         return res
             .status(200)
             .json(successResponse("Logged out successfully.", {}));
-    } catch (err) {
-        next(err);
-    }
-};
-
-export const verifyEmail = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const { token, id } = req.query;
-        if (!token || !id) {
-            return res
-                .status(400)
-                .json(
-                    errorResponse(
-                        400,
-                        "INVALID_VERIFICATION_LINK",
-                        "Invalid or missing token/ID",
-                        "/auth/verify-email"
-                    )
-                );
-        }
-
-        const userId = parseInt(id as string, 10);
-        const success = await verifyAndClearVerificationToken(
-            userId,
-            token as string
-        );
-        if (!success) {
-            return res
-                .status(400)
-                .json(
-                    errorResponse(
-                        400,
-                        "INVALID_VERIFICATION_TOKEN",
-                        "Invalid or expired verificaiton token",
-                        "/auth/verify-email"
-                    )
-                );
-        }
-        return res
-            .status(200)
-            .json(
-                successResponse(
-                    "Email verified successfully. You can now log in.",
-                    null
-                )
-            );
     } catch (err) {
         next(err);
     }

@@ -7,21 +7,22 @@ export interface User {
     id: number;
     username: string;
     email: string;
+    country: string;
     password_hash: string;
-    is_verified?: boolean;
-    verification_token?: string;
-    verification_token_expires?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export const createUser = async (
     username: string,
     email: string,
+    country: string,
     hashedPassword: string
 ): Promise<User | null> => {
     try {
         const result = await pool.query<User>(
-            "INSERT INTO public.users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *",
-            [username, email, hashedPassword]
+            "INSERT INTO public.users (username, email, country, password_hash) VALUES ($1, $2, $3, $4) RETURNING *",
+            [username, email, country, hashedPassword]
         );
         return result.rows[0] || null;
     } catch (err: any) {
@@ -52,41 +53,42 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
     }
 };
 
-export const setVerificationToken = async (
-    userId: number,
-    token: string,
-    expiresAt: string
-) => {
-    await pool.query(
-        `UPDATE users
-        SET verification_token = $1, verification_token_expires = $2
-        WHERE id = $3`,
-        [token, expiresAt, userId]
-    );
-};
-
-export const verifyAndClearVerificationToken = async (
-    userId: number,
-    token: string
-) => {
+export const getUserByUsername = async (
+    username: string
+): Promise<User | null> => {
     try {
-        const result = await pool.query(
-            `
-            UPDATE users
-            SET is_verified = TRUE, verification_token = NULL, verification_token_expires = NULL
-            WHERE id = $1 AND verification_token = $2 AND verification_token_expires > NOW()
-            RETURNING id
-            `,
-            [userId, token]
+        const result = await pool.query<User>(
+            "SELECT * FROM public.users. WHERE username=$1",
+            [username]
         );
-
-        return result.rows.length > 0;
-    } catch (err) {
+        return result.rows[0] || null;
+    } catch (err: any) {
+        if (err.errorCode) throw err;
         throw errorResponse(
             500,
             "DB_QUERY_FAILED",
-            "Failed to verify and update user",
-            "/verify-email"
+            "Failed to query user",
+            "/user"
+        );
+    }
+};
+
+export const getUserByEmailOrUsername = async (
+    usernameOrEmila: string
+): Promise<User | null> => {
+    try {
+        const result = await pool.query<User>(
+            "SELECT * FROM public.users WHERE email=$1 OR username=$1",
+            [usernameOrEmila]
+        );
+        return result.rows[0] || null;
+    } catch (err: any) {
+        if (err.errCode) throw err;
+        throw errorResponse(
+            500,
+            "DB_QUERY_FAILED",
+            "Failed to query user",
+            "/user"
         );
     }
 };

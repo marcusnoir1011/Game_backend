@@ -21,14 +21,12 @@ export interface AuthTokens {
     refreshToken?: string;
 }
 
-export type AuthUser = Pick<
-    Required<User>,
-    "id" | "username" | "email" | "is_verified"
->;
+export type AuthUser = Pick<User, "id" | "username" | "email" | "country">;
 
 export const signUpUser = async (
     username: string,
     email: string,
+    country: string,
     password: string
 ): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> => {
     try {
@@ -45,7 +43,7 @@ export const signUpUser = async (
 
         // Hash password and create user
         const hashedPassword = await argon2.hash(password);
-        const user = await createUser(username, email, hashedPassword);
+        const user = await createUser(username, email, country, hashedPassword);
 
         if (!user) {
             throw errorResponse(
@@ -61,9 +59,7 @@ export const signUpUser = async (
             expiresIn: "15m",
         });
 
-        const { token: refreshToken, tokenId } = await generateRefreshToken(
-            user.id
-        );
+        const { token: refreshToken } = await generateRefreshToken(user.id);
 
         return {
             accessToken: token,
@@ -72,7 +68,7 @@ export const signUpUser = async (
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                is_verified: user.is_verified!,
+                country: user.country,
             },
         };
     } catch (err: any) {
@@ -87,12 +83,12 @@ export const signUpUser = async (
 };
 
 export const loginUser = async (
-    email: string,
+    usernameOrEmail: string,
     password: string
 ): Promise<{ accessToken: string; refreshToken: string; user: AuthUser }> => {
     try {
         // Check if the user exist
-        const user: User | null = await getUserByEmail(email);
+        const user: User | null = await getUserByEmail(usernameOrEmail);
         if (!user)
             throw errorResponse(
                 401,
@@ -100,15 +96,6 @@ export const loginUser = async (
                 "Invalid email or password",
                 "/auth/login"
             ) as never;
-
-        if (!user.is_verified) {
-            throw errorResponse(
-                401,
-                "EMAIL_NOT_VERIFIED",
-                "Please verify your email to log in",
-                "/auth/login"
-            ) as never;
-        }
 
         // Verifying
         const isValid = await argon2.verify(user.password_hash, password);
@@ -133,7 +120,7 @@ export const loginUser = async (
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                is_verified: user.is_verified!,
+                country: user.country,
             },
         };
     } catch (err: any) {
