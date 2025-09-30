@@ -15,13 +15,13 @@ const authRouter: Router = express.Router();
 
 // Routes
 authRouter.post(
-    "/auth/signup",
+    "/signup",
     validate<SignupInput>(signupSchema) as RequestHandler,
     signUp
 );
-authRouter.post("/auth/logout", logout);
+authRouter.post("/logout", logout);
 authRouter.post(
-    "/auth/login",
+    "/login",
     validate<LoginInput>(loginSchema) as RequestHandler,
     login
 );

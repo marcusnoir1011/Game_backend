@@ -1,11 +1,11 @@
 // Core
-import express, { Router, type Request } from "express";
+import express, { Router } from "express";
 
 // Custom
 import { refreshingToken } from "../controllers/tokenController.js";
 
 const tokenRouter: Router = express.Router();
 
-tokenRouter.post("/auth/refresh", refreshingToken);
+tokenRouter.post("/refresh", refreshingToken);
 
 export default tokenRouter;

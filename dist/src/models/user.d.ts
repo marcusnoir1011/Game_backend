@@ -2,12 +2,12 @@ export interface User {
     id: number;
     username: string;
     email: string;
+    country: string;
     password_hash: string;
-    is_verified?: boolean;
-    verification_token?: string;
-    verification_token_expires?: string;
+    created_at?: string;
+    updated_at?: string;
 }
-export declare const createUser: (username: string, email: string, hashedPassword: string) => Promise<User | null>;
+export declare const createUser: (username: string, email: string, country: string, hashedPassword: string) => Promise<User | null>;
 export declare const getUserByEmail: (email: string) => Promise<User | null>;
-export declare const setVerificationToken: (userId: number, token: string, expiresAt: string) => Promise<void>;
-export declare const verifyAndClearVerificationToken: (userId: number, token: string) => Promise<boolean>;
+export declare const getUserByUsername: (username: string) => Promise<User | null>;
+export declare const getUserByEmailOrUsername: (usernameOrEmail: string) => Promise<User | null>;

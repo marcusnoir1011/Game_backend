@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "vitest",
         "dev": "nodemon index.ts",
         "start": "node index.ts",
         "dev:local": "dotenv -e .env.local -- ts-node src/index.ts",

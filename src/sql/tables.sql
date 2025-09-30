@@ -7,17 +7,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-
-ALTER TABLE users
-ADD COLUMN is_verified BOOLEAN DEFAULT FALSE,
-ADD COLUMN verification_token TEXT,
-ADD COLUMN verification_token_expires TIMESTAMP
-
-ALTER TABLE users
-    DROP COLUMN is_verified,
-    DROP COLUMN verification_token,
-    DROP COLUMN verification_token_expires
-
 ALTER TABLE users
 ADD COLUMN country VARCHAR(100) NOT NULL DEFAULT 'Unknown';
 
@@ -61,3 +50,17 @@ CREATE TABLE scores (
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, mode_id)
 );
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES users(id),
+    token_id UUID NOT NULL UNIQUE,
+    token_hash TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS
+idx_password_reset_token_id ON password_reset_tokens(token_id);
+CREATE INDEX IF NOT EXISTS
+idx_password_reset_user_id ON password_reset_tokens(user_id);

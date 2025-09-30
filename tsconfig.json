@@ -29,6 +29,6 @@
         "noUncheckedSideEffectImports": true,
         "noImplicitAny": true
     },
-    "include": ["**/**/*.ts"],
+    "include": ["**/**/*.ts", "tests/modelsUser.test.ts"],
     "exclude": ["node_modules", "dist"]
 }

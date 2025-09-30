@@ -3,12 +3,10 @@ import { signUpUser, loginUser } from "../services/authService.js";
 import { successResponse } from "../utils/successResponse.js";
 import { verifyAndRevokeRefreshToken } from "../services/tokenService.js";
 import { errorResponse } from "../utils/errorResponse.js";
-import { sendVerificationEmail } from "../services/emailService.js";
-import { verifyAndClearVerificationToken } from "../models/user.js";
 export const signUp = async (req, res, next) => {
     try {
         const validatedReq = req;
-        const { accessToken, refreshToken, user } = await signUpUser(validatedReq.validated.username, validatedReq.validated.email, validatedReq.validated.password);
+        const { accessToken, refreshToken, user } = await signUpUser(validatedReq.validated.username, validatedReq.validated.email, validatedReq.validated.country, validatedReq.validated.password);
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -21,7 +19,6 @@ export const signUp = async (req, res, next) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
             sameSite: "strict",
         });
-        await sendVerificationEmail(user.id, user.email);
         res.status(201).json(successResponse("User signed up successful. Please verify your email.", {
             user,
         }));
@@ -33,7 +30,7 @@ export const signUp = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const validatedReq = req;
-        const { user, accessToken, refreshToken } = await loginUser(validatedReq.validated.email, validatedReq.validated.password);
+        const { user, accessToken, refreshToken } = await loginUser(validatedReq.validated.usernameOrEmail, validatedReq.validated.password);
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -73,29 +70,6 @@ export const logout = async (req, res, next) => {
         return res
             .status(200)
             .json(successResponse("Logged out successfully.", {}));
-    }
-    catch (err) {
-        next(err);
-    }
-};
-export const verifyEmail = async (req, res, next) => {
-    try {
-        const { token, id } = req.query;
-        if (!token || !id) {
-            return res
-                .status(400)
-                .json(errorResponse(400, "INVALID_VERIFICATION_LINK", "Invalid or missing token/ID", "/auth/verify-email"));
-        }
-        const userId = parseInt(id, 10);
-        const success = await verifyAndClearVerificationToken(userId, token);
-        if (!success) {
-            return res
-                .status(400)
-                .json(errorResponse(400, "INVALID_VERIFICATION_TOKEN", "Invalid or expired verificaiton token", "/auth/verify-email"));
-        }
-        return res
-            .status(200)
-            .json(successResponse("Email verified successfully. You can now log in.", null));
     }
     catch (err) {
         next(err);
