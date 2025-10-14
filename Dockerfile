@@ -7,17 +7,19 @@ WORKDIR /app
 
 # Copy package.json first
 COPY package*.json ./
-RUN npm ci --omit=dev
 
 # Install dependencies
-RUN npm install
+RUN npm ci --omit=dev
 
 # Copy all other files
 COPY . .
+
+# Build Typescript files
+RUN npm run build
 
 # Expose port
 EXPOSE 3030
 
 # Start app
 RUN npm run build
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
