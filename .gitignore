@@ -3,3 +3,4 @@
 .env.local
 .env.docker
 /dist
+test

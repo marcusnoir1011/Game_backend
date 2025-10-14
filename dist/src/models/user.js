@@ -16,4 +16,7 @@ export const getUserByEmailOrUsername = async (usernameOrEmail) => {
     const result = await pool.query("SELECT * FROM public.users WHERE email=$1 OR username=$1", [usernameOrEmail]);
     return result.rows[0] || null;
 };
+export const updateUserPassword = async (userId, hashedPassword) => {
+    await pool.query("UPDATE public.users SET password_hash=$1, updated_at=NOW()  WHERE id=$2", [hashedPassword, userId]);
+};
 //# sourceMappingURL=user.js.map

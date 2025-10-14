@@ -11,3 +11,4 @@ export declare const createUser: (username: string, email: string, country: stri
 export declare const getUserByEmail: (email: string) => Promise<User | null>;
 export declare const getUserByUsername: (username: string) => Promise<User | null>;
 export declare const getUserByEmailOrUsername: (usernameOrEmail: string) => Promise<User | null>;
+export declare const updateUserPassword: (userId: number, hashedPassword: string) => Promise<void>;

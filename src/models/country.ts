@@ -8,8 +8,9 @@ export interface Country {
     capital: string;
     region: string;
     currency: string;
-    flag: string;
-    map: string | null;
+    flag_url: string;
+    map_url: string | null;
+    description: string | null;
     similar_flags: string[];
     popular_places: string[];
     created_at: Date;
@@ -21,8 +22,8 @@ export const createCountry = async (
 ): Promise<Country> => {
     const result = await pool.query<Country>(
         `INSERT INTO public.countries
-        (name, code, capital, region, currency, flag, map, similar_flags, popular_places)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        (name, code, capital, region, currency, flag_url, map_url, description, similar_flags, popular_places)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
         `,
         [
@@ -31,8 +32,9 @@ export const createCountry = async (
             data.capital,
             data.region,
             data.currency,
-            data.flag,
-            data.map,
+            data.flag_url,
+            data.map_url,
+            data.description,
             data.similar_flags,
             data.popular_places,
         ]
@@ -42,7 +44,7 @@ export const createCountry = async (
 
 export const getAllCountries = async (): Promise<Country[]> => {
     const result = await pool.query<Country>(
-        "SELECT id, name, code, capital, region, flag FROM public.countries ORDER by name"
+        "SELECT id, name, code, capital, region, flag_url FROM public.countries ORDER by name"
     );
     return result.rows;
 };

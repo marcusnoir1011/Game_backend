@@ -11,9 +11,12 @@ import passwdResetRouter from "./src/routes/passwordResetRoute.js";
 import { errorHandler } from "./src/middleware/middleware.js";
 import { connectToDatabase } from "./src/config/db.js";
 import "./src/config/env.js";
+import countryRouter from "./src/routes/countryRoute.js";
+import path from "path";
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 const app = express();
+app.use("/assets", express.static(path.join(process.cwd(), "test", "Desktop")));
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -29,6 +32,7 @@ app.use("/api/", apiLimiter);
 app.use("/api/auth", authRouter);
 app.use("/api/auth", tokenRouter);
 app.use("/api/auth", passwdResetRouter);
+app.use("/game", countryRouter);
 // Error Handler
 app.use(errorHandler);
 // Connecting to database and Start the server

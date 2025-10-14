@@ -32,6 +32,8 @@ export const requestPasswordReset = async (
         }
         await forgetPassword(email);
 
+        console.log("Password reset request received");
+
         res.status(200).json(
             successResponse(
                 "If the email exists, a reset link has been sent.",

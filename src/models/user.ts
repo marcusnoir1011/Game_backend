@@ -57,7 +57,7 @@ export const updateUserPassword = async (
     hashedPassword: string
 ): Promise<void> => {
     await pool.query(
-        "UPDATE public.users SET password_hash=$1, updated_at=$NOW()  WHERE id=$2",
+        "UPDATE public.users SET password_hash=$1, updated_at=NOW()  WHERE id=$2",
         [hashedPassword, userId]
     );
 };

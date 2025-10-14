@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Copy package.json first
 COPY package*.json ./
+RUN npm ci --omit=dev
 
 # Install dependencies
 RUN npm install
@@ -18,4 +19,5 @@ COPY . .
 EXPOSE 3030
 
 # Start app
+RUN npm run build
 CMD ["npm", "start"]

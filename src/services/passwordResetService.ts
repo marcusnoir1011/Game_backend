@@ -46,8 +46,10 @@ export const consumePasswordResetToken = async (id: number) => {
 };
 
 export const forgetPassword = async (email: string): Promise<void> => {
+    console.log("Forget password called with: ", email);
     const user = await getUserByEmail(email);
     if (!user) return;
+    console.log("Found user: ", user);
 
     const { tokenId, rawToken } = await generatePasswordResetToken(user.id);
 
