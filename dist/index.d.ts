@@ -1,3 +1,3 @@
-import "./src/config/env.js";
-declare const app: import("express-serve-static-core").Express;
+import { type Express } from "express";
+declare const app: Express;
 export default app;

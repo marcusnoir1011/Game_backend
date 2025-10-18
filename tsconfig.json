@@ -3,6 +3,7 @@
     "compilerOptions": {
         // Core settings
         "module": "nodenext",
+        "typeRoots": ["./node_modules/@types", "./src/types"],
         "moduleResolution": "nodenext",
         "target": "es2022",
         "lib": ["ES2022"],

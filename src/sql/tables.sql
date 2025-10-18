@@ -64,3 +64,13 @@ CREATE INDEX IF NOT EXISTS
 idx_password_reset_token_id ON password_reset_tokens(token_id);
 CREATE INDEX IF NOT EXISTS
 idx_password_reset_user_id ON password_reset_tokens(user_id);
+
+
+alter table users 
+add column coin int default 0,
+add column energy int default 10,
+add column profile_image_id int,
+add column avatar_image_id int,
+add column background_image_id int,
+add constraint fk_user_profile_image
+	foreign key (profile_image)

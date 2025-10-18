@@ -1,25 +1,21 @@
 // Core
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
+import * as jwtModule from "jsonwebtoken";
 import dotenv from "dotenv";
 import { type ZodType } from "zod";
+
+const { JsonWebTokenError, TokenExpiredError } = jwtModule;
 
 // Custom
 import { errorResponse } from "../utils/errorResponse.js";
 import { type ValidatedRequest } from "../types/validatedRequest.js";
-import { type AuthenticatedRequest } from "../types/authenticatedRequest.js";
 
 dotenv.config();
 
-export interface CustomRequest extends Request {
-    user?: {
-        id: number;
-    };
-}
-
 // Authentication
 export const authenticate = (
-    req: CustomRequest,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
@@ -39,50 +35,63 @@ export const authenticate = (
 
     const token = authHeader.split(" ")[1];
     if (!token) {
-        return res
-            .status(401)
-            .json(
-                errorResponse(
-                    401,
-                    "INVALID_TOKEN",
-                    "Invalid authorization header format",
-                    req.path
-                )
-            );
+        console.error("JWT_SECRET enviroment variable is not set.");
+        return next(
+            errorResponse(
+                401,
+                "INVALID_TOKEN",
+                "Invalid authorization header format",
+                req.path
+            )
+        );
     }
 
     try {
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET as string
-        ) as JwtPayload;
-        if (!decoded.id) {
-            throw new Error("Invalid token payload");
+        ) as Express.UserPayLoad;
+
+        if (typeof decoded.id !== "number" || !decoded.id) {
+            throw new JsonWebTokenError(
+                "Token payload is invalid (missing user ID)."
+            );
         }
+
         req.user = { id: decoded.id };
         next();
-    } catch (err) {
+    } catch (error) {
+        const err = error as { name?: string; message?: string };
+
+        let status = 403;
+        let errorCode = "TOKEN_INVALID";
+        let message = "Token is invalid or expired.";
+
+        if (err?.name === "TokenExpiredError") {
+            errorCode = "TOKEN_EXPIRED";
+            message = "Access token has expired.";
+        } else if (err?.name === "JsonWebTokenError") {
+            errorCode = "TOKEN_INVALID";
+        } else {
+            status = 500;
+            errorCode = "AUTH_PROCESSING_ERROR";
+            message = "An expected error occurred during token processing";
+        }
+
         return res
-            .status(403)
-            .json(
-                errorResponse(
-                    403,
-                    "TOKEN_INVALID_OR_EXPIRED_TOKEN",
-                    "Token is invalid or expired",
-                    req.path
-                )
-            );
+            .status(status)
+            .json(errorResponse(status, errorCode, message, req.path));
     }
 };
 
 // Validation
 export const validate =
-    <T>(authSchema: ZodType<T>) =>
+    <T>(authSchema: ZodType<T>): RequestHandler =>
     (req: Request, res: Response, next: NextFunction) => {
         const result = authSchema.safeParse(req.body);
         if (!result.success) {
             const validationErrors = result.error.issues.map((err) => {
-                return `${err.path.join(".")}: ${err.message}`;
+                return `[${err.path.join(".")}] ${err.message}`;
             });
 
             return res
@@ -91,7 +100,7 @@ export const validate =
                     errorResponse(
                         400,
                         "VALIDATION_ERROR",
-                        validationErrors.join(", "),
+                        validationErrors.join("; "),
                         req.path
                     )
                 );
@@ -107,18 +116,23 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    console.error(err);
-    if (err.errorCode) {
-        return res.status(err.status || 400).json(err);
+    if (res.headersSent) {
+        return next(err);
     }
-    return res
-        .status(500)
-        .json(
-            errorResponse(
-                500,
-                "INTERNAL_SERVER_ERROR",
-                "Something went wrong",
-                req.path
-            )
-        );
+    if (!err.errorCode && err instanceof Error) {
+        console.log("Unexpected Server Error: ", err.stack || err.message);
+    }
+
+    if (err.errorCode && typeof err.status === "number") {
+        return res.status(err.status).json(err);
+    }
+
+    const finalError = errorResponse(
+        500,
+        "INTERNAL_SERVER_ERROR",
+        "An expected internal server error occurred.",
+        req.path
+    );
+
+    return res.status(500).json(finalError);
 };
