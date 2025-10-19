@@ -4,17 +4,15 @@ import { Pool } from "pg";
 // Custom
 import { errorResponse } from "../utils/errorResponse.js";
 import "./env.js";
+import process from "process";
 
-if (!process.env.DB_HOST || !process.env.DB_PORT) {
+if (!process.env.DATABASE_URL {
     throw new Error("Database environment vairables are not set");
 }
 
 const pool = new Pool({
-    host: process.env.DB_HOST as string,
-    port: parseInt(process.env.DB_PORT as string, 10),
-    database: process.env.DB_NAME as string,
-    password: process.env.DB_PASSWORD as string,
-    user: process.env.DB_USER as string,
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
 const connectToDatabase = async (): Promise<void> => {
