@@ -8,13 +8,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // Custom
-import authRouter from "./src/routes/authRoute.js";
-import tokenRouter from "./src/routes/tokenRoute.js";
-import passwdResetRouter from "./src/routes/passwordResetRoute.js";
-import countryRouter from "./src/routes/countryRoute.js";
-import profileRouter from "./src/routes/profileRoute.js";
-import { errorHandler } from "./src/middleware/middleware.js";
-import { connectToDatabase } from "./src/config/db.js";
+import authRouter from "./routes/authRoute.js";
+import tokenRouter from "./routes/tokenRoute.js";
+import passwdResetRouter from "./routes/passwordResetRoute.js";
+import countryRouter from "./routes/countryRoute.js";
+import profileRouter from "./routes/profileRoute.js";
+import { errorHandler } from "./middleware/middleware.js";
+import { connectToDatabase } from "./config/db.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
