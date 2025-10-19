@@ -58,7 +58,7 @@ const apiLimiter = rateLimit({
 app.use("/api/v1", apiLimiter);
 
 // Static assets
-app.use("/assets", express.static(path.join(process.cwd(), "test", "Desktop")));
+app.use("/assets", express.static(path.join(process.cwd(), "public")));
 
 // Routes
 // Auth Group
