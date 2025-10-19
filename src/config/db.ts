@@ -6,13 +6,13 @@ import { errorResponse } from "../utils/errorResponse.js";
 import "./env.js";
 import process from "process";
 
-if (!process.env.DATABASE_URL {
+if (!process.env.DATABASE_URL) {
     throw new Error("Database environment vairables are not set");
 }
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
 });
 
 const connectToDatabase = async (): Promise<void> => {
