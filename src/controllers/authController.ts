@@ -23,16 +23,18 @@ export const signUp = async (
             validatedReq.validated.password
         );
 
+        console.log("Signup success: ", user);
+
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV === "staging",
             maxAge: 15 * 60 * 1000,
             sameSite: "strict",
         });
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV === "staging",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             sameSite: "strict",
         });
@@ -46,6 +48,7 @@ export const signUp = async (
             )
         );
     } catch (err) {
+        console.log("Signup error: ", err);
         next(err);
     }
 };
