@@ -27,44 +27,49 @@ export const signUpUser = async (
     country: string,
     password: string
 ): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> => {
-    const existingUser = await getUserByEmailOrUsername(email);
-    if (existingUser) {
-        throw errorResponse(
-            400,
-            "USER_ALREADY_EXISTS",
-            "Email already in use",
-            "/auth/signup"
-        ) as never;
+    try {
+        const existingUser = await getUserByEmailOrUsername(email);
+        if (existingUser) {
+            throw errorResponse(
+                400,
+                "USER_ALREADY_EXISTS",
+                "Email already in use",
+                "/auth/signup"
+            ) as never;
+        }
+
+        const hashedPassword = await argon2.hash(password);
+        const user = await createUser(username, email, country, hashedPassword);
+        console.log("User created", user);
+
+        if (!user) {
+            throw errorResponse(
+                500,
+                "USER_CREATION_FAILED",
+                "Could not create the user",
+                "/auth/signup"
+            ) as never;
+        }
+
+        const accessToken = jwt.sign({ id: user.id }, JWT_SECRET, {
+            expiresIn: "15m",
+        });
+
+        const { token: refreshToken } = await generateRefreshToken(user.id);
+
+        return {
+            accessToken,
+            refreshToken,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                country: user.country,
+            },
+        };
+    } catch (err) {
+        console.log("SIGNUP ERROR: ", err);
     }
-
-    const hashedPassword = await argon2.hash(password);
-    const user = await createUser(username, email, country, hashedPassword);
-
-    if (!user) {
-        throw errorResponse(
-            500,
-            "USER_CREATION_FAILED",
-            "Could not create the user",
-            "/auth/signup"
-        ) as never;
-    }
-
-    const accessToken = jwt.sign({ id: user.id }, JWT_SECRET, {
-        expiresIn: "15m",
-    });
-
-    const { token: refreshToken } = await generateRefreshToken(user.id);
-
-    return {
-        accessToken,
-        refreshToken,
-        user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            country: user.country,
-        },
-    };
 };
 
 export const loginUser = async (
