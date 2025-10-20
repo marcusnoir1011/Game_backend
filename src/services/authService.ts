@@ -17,6 +17,8 @@ dotenv.config();
 if (!process.env.JWT_SECRET)
     throw new Error("JWT_SECRET not defined in enviroment");
 
+console.log("JWT_SECRET", process.env.JWT_SECRET ? "OK" : "MISSING");
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export type AuthUser = Pick<User, "id" | "username" | "email" | "country">;
@@ -81,7 +83,18 @@ export const loginUser = async (
             "/auth/login"
         ) as never;
 
-    const isValid = await argon2.verify(user.password_hash, password);
+    let isValid = false;
+    try {
+        isValid = await argon2.verify(user.password_hash, password);
+    } catch (err) {
+        console.error("Password verification failed:", err);
+        throw errorResponse(
+            500,
+            "PASSWORD_VERIFICATION_FAILED",
+            "Error verifying password",
+            "/auth/login"
+        ) as never;
+    }
     if (!isValid)
         throw errorResponse(
             401,

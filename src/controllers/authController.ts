@@ -48,7 +48,7 @@ export const signUp = async (
             )
         );
     } catch (err) {
-        console.log("Signup error: ", err);
+        console.error("Signup error: ", err);
         next(err);
     }
 };
@@ -86,6 +86,7 @@ export const login = async (
             })
         );
     } catch (err) {
+        console.error("Internal error:", err);
         next(err);
     }
 };
