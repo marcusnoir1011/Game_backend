@@ -7,7 +7,16 @@ import "./env.js";
 import process from "process";
 
 if (!process.env.DATABASE_URL) {
-    throw new Error("Database environment vairables are not set");
+    const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
+
+    if (!DB_HOST || !DB_PORT || !DB_USER || !DB_PASSWORD || !DB_NAME) {
+        throw new Error(
+            "Database environment variables are not set correctly."
+        );
+    }
+
+    process.env.DATABASE_URL = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+    console.log("ℹ️ Built DATABASE_URL from local .env");
 }
 
 const pool = new Pool({
