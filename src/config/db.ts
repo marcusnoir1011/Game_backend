@@ -16,7 +16,7 @@ if (!process.env.DATABASE_URL) {
     }
 
     process.env.DATABASE_URL = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
-    console.log("ℹ️ Built DATABASE_URL from local .env");
+    console.log("Built DATABASE_URL from local .env");
 }
 
 const pool = new Pool({
